@@ -1,0 +1,39 @@
+.roomLoginContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.roomLoginHeader {
+  color: #fff;
+  font-family: var(--globalSecondaryFont);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.roomContentContainer {
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inputContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputContainer > :first-child {
+  color: #fff;
+  border: none;
+}
+
+.inputContainer > input {
+  width: 100%;
+}
