@@ -1,4 +1,3 @@
-import React from "react";
 import styles from "./promotionModal.module.css";
 import { Bishop, Knight, Queen, Rook } from "../../utils/pieces";
 import { COINS, COIN_IMAGES, GRID_COLORS } from "../../constant";

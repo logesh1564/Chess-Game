@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import  { useContext, useState } from "react";
 import RenderWhen from "../../HOC/RenderWhen";
 import cloneDeep from "lodash.clonedeep";
 import { ResultModal } from "../modals";
