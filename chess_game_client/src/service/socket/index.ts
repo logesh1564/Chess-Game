@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { GridDataType } from "../../types";
 import { GAME_ENDED_REASON, GRID_COLORS } from "../../constant";
 
-const SERVER = "http://localhost:1564/";
+const SERVER = "https://chess-game-0uwo.onrender.com";
 
 export type GAME_RESULT_TYPE = {
   type?: GAME_ENDED_REASON;
