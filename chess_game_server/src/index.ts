@@ -82,7 +82,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = 1564;
+const PORT = process.env.PORT || 1564;
 server.listen(PORT, () => {
   console.log(`app started on port ${PORT}`);
 });
