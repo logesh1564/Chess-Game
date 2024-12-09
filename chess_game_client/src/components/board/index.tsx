@@ -1,4 +1,4 @@
-import  { useContext, useState } from "react";
+import { useState } from "react";
 import RenderWhen from "../../HOC/RenderWhen";
 import cloneDeep from "lodash.clonedeep";
 import { ResultModal } from "../modals";
@@ -9,7 +9,6 @@ import {
   GAME_ENDED_REASON,
   GRID_COLORS,
 } from "../../constant";
-// import { getInitialBoardSetup } from "../../utils/boardInitialSetup";
 import { classNames } from "../../utils/common";
 
 import { GridDataType, PieceType, PositionType } from "../../types";
@@ -22,40 +21,39 @@ import {
   updateFirstMove,
   updateValidMoves,
 } from "../../utils/validations";
-import { GameContext } from "../../App";
-import { SocketServiceInstance } from "../../service/socket";
+// import { GameContext } from "../../App";
+import { GAME_RESULT_TYPE, SocketServiceInstance } from "../../service/socket";
 
 import styles from "./chessBoard.module.css";
 
 // import { PromotionModal } from "../promotionModal";
 
-export const ChessBoard = (): JSX.Element => {
-  const {
-    board,
-    setBoard,
-    setTurn,
-    turn,
-    gameEndDetails,
-    setGameEndDetails,
-    roomId,
-    currentPiece,
-  } = useContext(GameContext);
+interface ChessBoardProps {
+  board: GridDataType[][];
+  setBoard: React.Dispatch<React.SetStateAction<GridDataType[][]>>;
+  turn: GRID_COLORS;
+  setTurn: React.Dispatch<React.SetStateAction<GRID_COLORS>>;
+  gameEndDetails: GAME_RESULT_TYPE;
+  setGameEndDetails: React.Dispatch<React.SetStateAction<GAME_RESULT_TYPE>>;
+  roomId: string;
+  currentPiece: GRID_COLORS;
+}
+
+export const ChessBoard = ({
+  board,
+  setBoard,
+  setTurn,
+  turn,
+  gameEndDetails,
+  setGameEndDetails,
+  roomId,
+  currentPiece,
+}: ChessBoardProps): JSX.Element => {
   const [selectedCoin, setSelectedCoin] = useState<PieceType | null>(null);
   const [lastMove, setLastMove] = useState<{
     source: PositionType;
     target: PositionType;
   } | null>(null);
-
-  //  NEEDS TO CHANGE SEPERATE ENUM
-  // const [board, setBoard] = useState<GridDataType[][]>([]);
-  // const [promotionModal, setPromotionModal] = useState(false);
-  // const [turn, setTurn] = useState<GRID_COLORS>(GRID_COLORS.WHITE);
-  // const [gameEndDetails, setGameEndDetails] = useState<null | {
-  //   type: GAME_ENDED_REASON;
-  //   details?: {
-  //     winner: GRID_COLORS;
-  //   };
-  // }>(null);
 
   const simulateMove = (
     board: GridDataType[][],
@@ -201,6 +199,8 @@ export const ChessBoard = (): JSX.Element => {
     return true; // No valid moves found, stalemate
   };
 
+  console.log({ gameEndDetails });
+
   const move = (currentPosition: PositionType) => {
     // I) change to player move and check if there no check then update in board
     if (selectedCoin && currentPosition) {
@@ -243,7 +243,7 @@ export const ChessBoard = (): JSX.Element => {
         SocketServiceInstance.updatedetails(roomId, {
           board: tempBoard,
           turn: invertedTurn,
-          result: gameEndDetails,
+          result: gameStatus,
         });
       }
       setSelectedCoin(null);

@@ -1,0 +1,74 @@
+.container {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-gray-800);
+  padding: 2rem clamp(1.2rem, 3vw, 2rem);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.container:after {
+  background: url("/src/assets/login-bg.png") repeat-x bottom;
+  background-size: contain;
+  content: "";
+  height: 100vh;
+  left: 0;
+  bottom: 1px;
+  position: fixed;
+  right: 0;
+  z-index: 1;
+}
+.container > * {
+  z-index: 2;
+}
+.container > header {
+  padding-bottom: 3rem;
+}
+.loginFormWrapper {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  height: 600px;
+  width: 400px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--border-radius);
+}
+
+.loginFormInnerCard {
+  padding: var(--space-40) var(--space-40) var(--space-10) var(--space-40);
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.loginFormfotterCard {
+  padding: var(--space-20) var(--space-28);
+  text-align: center;
+  color: hsla(0, 0%, 100%, 0.72);
+  font-weight: var(--font-weight-600);
+  background: rgb(33, 31, 28);
+  border-radius: var(--border-radius);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+    Helvetica, Arial, sans-serif;
+  font-size: var(--font-size-14);
+}
+
+.loginFormfotterCard > span:hover {
+  color: #ffff;
+  cursor: pointer;
+}
+
+.loginFormInnerCard > :first-child {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-24);
+}
+
+.loginBtnLabel {
+  font-weight: var(--font-weight-800);
+  font-size: var(--font-size-25);
+}

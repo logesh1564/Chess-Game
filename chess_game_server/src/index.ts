@@ -1,35 +1,75 @@
 import express from "express";
-import { createServer } from "http";
-import { Server } from "socket.io";
 import cors from "cors";
-import { getInitialBoardSetup } from "./services/chessboard/initialSetup";
-import { GRID_COLORS } from "./services/constant";
+import { createServer } from "http";
+import { Server, Socket } from "socket.io";
+import { getInitialSetup } from "./utils/pieceSetupHelpers";
+import { router } from "./Routes/authRoutes";
+
+//  configs
+import "./config/database";
+import { userRoutes } from "./Routes/userRoutes";
+import { updateGameDetailsController } from "./controllers/socket";
+import { verifyToken } from "./controllers/authController";
+import { userModal } from "./models/userDetails";
 
 const app = express();
 const server = createServer(app);
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000", // React app 1
+      "http://localhost:5173", // React app 2
+      "https://chess-game-7rvw.vercel.app",
+    ],
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allowed methods
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"], // Allowed headers
+    credentials: true, // Allow cookies and credentials
+  })
+);
+app.use(express.json());
 
-const io = new Server(server, {
+//  ----------------> socket setup and logic - START <---------------
+export const io = new Server(server, {
   cors: {
     origin: "*",
   },
 });
-
-// i) join room.
-// ii) send initial position with piece handling.
-// iii) update move in the server
-// iv) emit the updated values to the client
-
-// Todo
-// waiting for the oppnent.
-// throw room full error.
-// restart
-// disconnect
-// time
-
 const chessRooms: Record<string, any> = {};
+
+io.use(async (socket, next) => {
+  const token: string = socket?.handshake?.query?.token as string;
+
+  try {
+    if (!token)
+      return next(new Error("Authentication error: No token provided"));
+    const decodedData: any = await (verifyToken(token) as Promise<{
+      id: string;
+    }>);
+
+    const currentUser = await userModal.findById(decodedData.id);
+    if (!currentUser)
+      return new Error(
+        "the token belonging to this user does no longer exists"
+      );
+
+    if (
+      currentUser &&
+      !(currentUser as any)?.changedPasswordAfter(decodedData.iat)
+    ) {
+      return new Error("User Recently Changed the password");
+    }
+
+    (socket as any).user = currentUser;
+    next();
+  } catch (e) {
+    return next(
+      new Error("the token belonging to this user does no longer exists")
+    );
+  }
+});
 io.on("connection", (socket) => {
   // Join a Game Room
+
   socket.on("join_game", (roomId: string) => {
     socket.join(roomId);
     console.log("join", socket.id);
@@ -56,45 +96,16 @@ io.on("connection", (socket) => {
   });
 
   // Update Game Details
-  socket.on("update_details", (roomId: string, details: any) => {
-    const payload = {
-      board: details.board,
-      turn: details.turn,
-      result: details.result,
-      players: chessRooms?.[roomId]?.players,
-    };
-
-    // Update room details
-    const id =
-      chessRooms?.[roomId]?.players.playerOne === socket.id
-        ? chessRooms?.[roomId]?.players.playerTwo
-        : chessRooms?.[roomId]?.players.playerOne;
-
-    console.log("hit update_details", {
-      det: chessRooms[roomId],
-      roomId,
-      id,
-      chessRooms,
-    });
-
-    // Emit updated details to all clients in the room
-    io.to(id).emit("get_updated_details", payload);
+  socket.on("update_details", (roomId: string, details: any, callback) => {
+    updateGameDetailsController(socket, roomId, details, callback, chessRooms);
   });
 });
+//  -----------> socket setup and logic - END  <---------------
+
+app.use(router);
+app.use(userRoutes);
 
 const PORT = process.env.PORT || 1564;
 server.listen(PORT, () => {
   console.log(`app started on port ${PORT}`);
 });
-
-export const getInitialSetup = () => {
-  return {
-    board: getInitialBoardSetup(),
-    turn: GRID_COLORS.WHITE,
-    result: { winner: null, reason: null },
-    players: {
-      playerOne: null,
-      playerTwo: null,
-    },
-  };
-};

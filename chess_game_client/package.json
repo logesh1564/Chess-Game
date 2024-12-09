@@ -10,16 +10,21 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@types/socket.io-client": "^3.0.0",
+    "axios": "^1.7.7",
+    "immer": "^10.1.1",
+    "lodash": "^4.17.21",
     "lodash.clonedeep": "^4.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.28.0",
     "socket.io-client": "^4.7.5"
   },
   "devDependencies": {
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
+    "@types/react-router-dom": "^5.3.3",
+    "@types/socket.io-client": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "@vitejs/plugin-react": "^4.2.1",

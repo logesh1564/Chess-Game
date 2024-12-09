@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { GridDataType } from "../../types";
 import { GAME_ENDED_REASON, GRID_COLORS } from "../../constant";
 
-const SERVER = "https://chess-game-0uwo.onrender.com";
+export const SERVER_URI = "https://chess-game-0uwo.onrender.com";
 
 export type GAME_RESULT_TYPE = {
   type?: GAME_ENDED_REASON;
@@ -23,9 +23,10 @@ class SocketService {
   constructor(socket: any) {
     this.socket = socket;
   }
-  onConnect() {
+  onConnect(callBack: () => void) {
     if (this.socket) {
       this.socket.on("connect", () => {
+        callBack();
         console.log("connected to server.....");
       });
     }
@@ -57,14 +58,26 @@ class SocketService {
     }
   }
 
-  getUpdatedDetails(callBack: (data: GAME_SERVER_RESPONSE) => void) {
+  getUpdatedDetails(
+    callBack: (
+      data: GAME_SERVER_RESPONSE,
+      socketCallBack: (ack: string) => void
+    ) => void
+  ) {
     if (this.socket) {
-      this.socket.on("get_updated_details", (data: GAME_SERVER_RESPONSE) => {
-        console.log("working emit get_update_details");
-        callBack(data);
-      });
+      this.socket.on(
+        "get_updated_details",
+        (data: GAME_SERVER_RESPONSE, socketCallBack: (ack: string) => void) => {
+          console.log("working emit get_update_details");
+          callBack(data, socketCallBack);
+        }
+      );
     }
   }
 }
 
-export const SocketServiceInstance = new SocketService(io(SERVER));
+export const SocketServiceInstance = new SocketService(
+  io(SERVER_URI, {
+    query: { token: window.localStorage.getItem("lc-dev-userId") || "" },
+  })
+);

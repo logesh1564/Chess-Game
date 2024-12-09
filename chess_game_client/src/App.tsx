@@ -1,11 +1,25 @@
-import React, { createContext, useEffect, useState } from "react";
-import { ChessBoard } from "./components/board";
+import React, {
+  createContext,
+  useContext,
+  // useContext,
+  useEffect,
+} from "react";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
-import { GAME_RESULT_TYPE, SocketServiceInstance } from "./service/socket";
+import { Login } from "./pages/Login";
+import { Signup } from "./pages/Signup";
+import { RoomLogin } from "./pages/roomLogin";
+import { ChessRoom } from "./pages/chessRoom";
+
+import { GAME_RESULT_TYPE } from "./service/socket";
 import { GridDataType } from "./types";
 import { GRID_COLORS } from "./constant";
+
+import { getUserDetails } from "./service";
+import { isAuthenticated } from "./utils/auth";
 import styles from "./app.module.css";
-import { RoomLogin } from "./pages/roomLogin";
+import { UserDetailsContext } from "./store/userSlice";
+// import { UserDetailsContext } from "./store/userSlice";
 
 interface GameContextType {
   board: GridDataType[][];
@@ -32,53 +46,53 @@ export const GameContext = createContext<GameContextType>({
 });
 
 export const App = (): JSX.Element => {
-  const [roomId, setRoomId] = useState<string>("");
-  const [board, setBoard] = useState<GridDataType[][]>([]);
-  const [turn, setTurn] = useState<GRID_COLORS>(GRID_COLORS.WHITE);
-  const [currentPiece, setCurrentPieceHandling] = useState<GRID_COLORS>(
-    GRID_COLORS.WHITE
-  );
-  const [gameEndDetails, setGameEndDetails] = useState<GAME_RESULT_TYPE>(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const token = window.localStorage.getItem("lc-dev-userId");
+  const { dispatchUserDetails } = useContext(UserDetailsContext);
 
   useEffect(() => {
-    SocketServiceInstance.onConnect();
-    // SocketServiceInstance.joinToGame(roomId);
-    SocketServiceInstance.getInitialSetup((data) => {
-      setBoard(data.board);
-      setCurrentPieceHandling(data.pieceHandling);
-      setTurn(data.turn);
-    });
-    SocketServiceInstance.getUpdatedDetails((data) => {
-      console.log("get_updated_details", data);
-      setBoard(data.board);
-      setTurn(data.turn);
-      setGameEndDetails(data.result ? data.result : null);
-    });
-  }, []);
+    if (token && isAuthenticated()) {
+      if (!location.pathname.startsWith("/home"))
+        navigate("/home/chessRoomLogin");
+      getUserDetails()
+        .then((data) => {
+          dispatchUserDetails(data.user);
+          console.log("success.....");
+        })
+        .catch((e) => {
+          localStorage.removeItem("lc-dev-userId");
+          console.log(e);
+        });
+    }
+  }, [token]);
 
   return (
-    <GameContext.Provider
-      value={{
-        board,
-        setBoard,
-        turn,
-        setTurn,
-        gameEndDetails,
-        setGameEndDetails,
-        roomId,
-        currentPiece,
-        setRoomId,
-      }}
-    >
-      <main className={styles.appContainer}>
-        {roomId ? (
-          <section className={styles.appBoardCard}>
-            <ChessBoard />
-          </section>
-        ) : (
-          <RoomLogin />
-        )}
-      </main>
-    </GameContext.Provider>
+    <main className={styles.appContainer}>
+      <Navigation />
+    </main>
+  );
+};
+
+const Navigation = (): JSX.Element => {
+  return (
+    <Routes>
+      {/* {!isAuthenticated() && ( */}
+      {/* <> */}
+      <Route path={"/login"} element={<Login />} />
+      <Route path={"/signup"} element={<Signup />} />
+      {/* </> */}
+      {/* )} */}
+
+      <Route path={"/home/chessRoomLogin"} element={<RoomLogin />} />
+      <Route path={"/home/chessRoom/:roomId"} element={<ChessRoom />} />
+
+      <Route
+        path={"/"}
+        element={!isAuthenticated() ? <Login /> : <RoomLogin />}
+      />
+
+      {/* <Route path="*" element={<>Page Not Found</>} /> */}
+    </Routes>
   );
 };
