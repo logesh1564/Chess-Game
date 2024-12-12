@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { GridDataType } from "../../types";
 import { GAME_ENDED_REASON, GRID_COLORS } from "../../constant";
+import { DefaultEventsMap } from "@socket.io/component-emitter";
 
 export const SERVER_URI = "https://chess-game-0uwo.onrender.com";
 
@@ -19,8 +20,8 @@ export interface GAME_SERVER_RESPONSE {
 }
 
 class SocketService {
-  socket: any = null;
-  constructor(socket: any) {
+  socket: Socket<DefaultEventsMap, DefaultEventsMap> | null = null;
+  constructor(socket: Socket<DefaultEventsMap, DefaultEventsMap>) {
     this.socket = socket;
   }
   onConnect(callBack: () => void) {

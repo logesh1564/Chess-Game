@@ -25,14 +25,12 @@ export function ChessRoom() {
 
   useEffect(() => {
     setIsConnecting(true);
-
-    SocketServiceInstance.onConnect(() => {});
-
     SocketServiceInstance.getInitialSetup((data) => {
       setBoard(data.board);
       setCurrentPieceHandling(data.pieceHandling);
       setTurn(data.turn);
     });
+
     SocketServiceInstance.getUpdatedDetails((data, callback) => {
       console.log("get_updated_details", data);
       setBoard(data.board);
@@ -41,8 +39,11 @@ export function ChessRoom() {
       callback && callback("received");
     });
 
-    SocketServiceInstance.joinToGame(roomId || "");
-    setIsConnecting(false);
+    SocketServiceInstance.onConnect(() => {
+      SocketServiceInstance.joinToGame(roomId || "");
+      setIsConnecting(false);
+    });
+
     return () => {
       //  Needs to disconnect logic
       // SocketServiceInstance.
