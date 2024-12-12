@@ -1,6 +1,7 @@
 import { DefaultEventsMap } from "socket.io/dist/typed-events";
 import { io } from "..";
 import { Socket } from "socket.io";
+import { getInitialSetup } from "../utils/pieceSetupHelpers";
 
 const MAX_RETRIES = 30;
 
@@ -65,7 +66,7 @@ export const updateGameDetailsController = (
           // If either hasn't acknowledged, retry for the remaining player
           if (attempt < MAX_RETRIES) {
             console.log(`Retrying delivery... Attempt ${attempt + 1}`);
-            setTimeout(() => attemptSend(attempt + 1), 1000); // Retry after 1 second
+            setTimeout(() => attemptSend(attempt + 1), 5000); // Retry after 1 second
           } else {
             console.error("Failed to deliver update after retries.");
             callback("failed");
@@ -74,7 +75,7 @@ export const updateGameDetailsController = (
           // Failed acknowledgment case, handle retries
           if (attempt < MAX_RETRIES) {
             console.log(`Retrying delivery... Attempt ${attempt + 1}`);
-            setTimeout(() => attemptSend(attempt + 1), 1000); // Retry after 1 second
+            setTimeout(() => attemptSend(attempt + 1), 5000); // Retry after 1 second
           } else {
             console.error("Failed to deliver update after retries.");
             callback("failed");
@@ -86,4 +87,30 @@ export const updateGameDetailsController = (
 
   // Start the sending attempt
   attemptSend();
+};
+
+export const joinGameController = (
+  socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>,
+  roomId: string,
+  chessRooms: Record<string, any>
+) => {
+  socket.join(roomId);
+  if (!chessRooms?.[roomId]?.players?.playerTwo) {
+    if (!chessRooms[roomId]) {
+      chessRooms[roomId] = getInitialSetup();
+      chessRooms[roomId].players.playerOne = socket.id;
+    } else {
+      chessRooms[roomId].players.playerTwo = socket.id;
+    }
+
+    // Emit initial setup to all clients in the room
+    io.to(socket.id).emit("get_initial_setup", {
+      board: chessRooms[roomId].board,
+      turn: "white",
+      pieceHandling:
+        chessRooms[roomId].players.playerOne === socket.id ? "white" : "black",
+    });
+  } else {
+    console.log("ROOM IS FULL ...........");
+  }
 };
