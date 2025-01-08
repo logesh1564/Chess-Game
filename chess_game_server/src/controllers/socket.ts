@@ -43,45 +43,45 @@ export const updateGameDetailsController = (
     // Send message to both players
     io.to(targetPlayerId).emit(
       "get_updated_details",
-      payload,
-      (ack: string) => {
-        if (ack === "received") {
-          let currentAck = false;
-          // Mark acknowledgment for the specific player
-          if (socket.id === chessRooms?.[roomId]?.players.playerOne) {
-            // acknowledgments.playerOneAck = true;
-            currentAck = true;
-          } else if (socket.id === chessRooms?.[roomId]?.players.playerTwo) {
-            // acknowledgments.playerTwoAck = true;
-            currentAck = true;
-          }
+      payload
+      // (ack: string) => {
+      //   let currentAck = false;
+      //   if (ack === "received") {
+      //     // Mark acknowledgment for the specific player
+      //     if (socket.id === chessRooms?.[roomId]?.players.playerOne) {
+      //       // acknowledgments.playerOneAck = true;
+      //       currentAck = true;
+      //     } else if (socket.id === chessRooms?.[roomId]?.players.playerTwo) {
+      //       // acknowledgments.playerTwoAck = true;
+      //       currentAck = true;
+      //     }
 
-          // Check if both players have acknowledged
-          if (currentAck) {
-            console.log("Both players received the update successfully.");
-            callback("success");
-            return; // Both players have acknowledged
-          }
+      //     // Check if both players have acknowledged
+      //     if (currentAck) {
+      //       console.log("Both players received the update successfully.");
+      //       callback("success");
+      //       return; // Both players have acknowledged
+      //     }
 
-          // If either hasn't acknowledged, retry for the remaining player
-          if (attempt < MAX_RETRIES) {
-            console.log(`Retrying delivery... Attempt ${attempt + 1}`);
-            setTimeout(() => attemptSend(attempt + 1), 5000); // Retry after 1 second
-          } else {
-            console.error("Failed to deliver update after retries.");
-            callback("failed");
-          }
-        } else {
-          // Failed acknowledgment case, handle retries
-          if (attempt < MAX_RETRIES) {
-            console.log(`Retrying delivery... Attempt ${attempt + 1}`);
-            setTimeout(() => attemptSend(attempt + 1), 5000); // Retry after 1 second
-          } else {
-            console.error("Failed to deliver update after retries.");
-            callback("failed");
-          }
-        }
-      }
+      //     // If either hasn't acknowledged, retry for the remaining player
+      //     if (attempt < MAX_RETRIES) {
+      //       console.log(`Retrying delivery... Attempt ${attempt + 1}`);
+      //       setTimeout(() => attemptSend(attempt + 1), 5000); // Retry after 1 second
+      //     } else {
+      //       console.error("Failed to deliver update after retries.");
+      //       callback("failed");
+      //     }
+      //   } else {
+      //     // Failed acknowledgment case, handle retries
+      //     if (attempt < MAX_RETRIES) {
+      //       console.log(`Retrying delivery... Attempt ${attempt + 1}`);
+      //       setTimeout(() => attemptSend(attempt + 1), 5000); // Retry after 1 second
+      //     } else {
+      //       console.error("Failed to deliver update after retries.");
+      //       callback("failed");
+      //     }
+      //   }
+      // }
     );
   };
 
@@ -110,6 +110,7 @@ export const joinGameController = (
       pieceHandling:
         chessRooms[roomId].players.playerOne === socket.id ? "white" : "black",
     });
+    console.log("emitted");
   } else {
     console.log("ROOM IS FULL ...........");
   }

@@ -29,6 +29,11 @@ app.use(
 );
 app.use(express.json());
 
+//  -----------> socket setup and logic - END  <---------------
+
+app.use(router);
+app.use(userRoutes);
+
 //  ----------------> socket setup and logic - START <---------------
 export const io = new Server(server, {
   cors: {
@@ -48,10 +53,6 @@ io.on("connection", (socket) => {
     updateGameDetailsController(socket, roomId, details, callback, chessRooms)
   );
 });
-//  -----------> socket setup and logic - END  <---------------
-
-app.use(router);
-app.use(userRoutes);
 
 const PORT = process.env.PORT || 1564;
 server.listen(PORT, () => console.log(`app started on port ${PORT}`));
